@@ -8,6 +8,7 @@
 @include b(content) {
   flex: 1;
   overflow: auto;
+  margin-top: 70px;
   @include e(items) {
     padding: 10px;
     margin: 10px;
