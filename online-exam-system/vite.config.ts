@@ -13,7 +13,7 @@ export default defineConfig(() => ({
     vueJsx(),
     vueDevTools(),
     viteMockServe({
-      enable: true, // ✅ 确保本地开发环境启用 Mock
+      enable: true,
       mockPath: 'mock',
       logger: true,
     }),
@@ -27,6 +27,16 @@ export default defineConfig(() => ({
     preprocessorOptions: {
       scss: {
         additionalData: `@use "@/bem.scss" as *;`,
+      },
+    },
+  },
+  server: {
+    proxy: {
+      '/api': {
+        //代理所有以 `/api` 开头的请求
+        target: 'http://localhost:8080', // 后端地址
+        changeOrigin: true, // 允许跨域
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

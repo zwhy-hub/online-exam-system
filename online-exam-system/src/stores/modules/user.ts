@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import type { userState } from './types/userType'
 import { register } from '@/api/user'
-import type { RegisterData, Response } from '@/api/user/type'
+import type { RegisterData, RegisterResponse } from '@/api/user/type'
 
 const useUserStore = defineStore('User', {
   state: (): userState => ({
@@ -10,16 +10,16 @@ const useUserStore = defineStore('User', {
 
   actions: {
     async Register(data: RegisterData) {
-      const res: Response = await register(data)
+      const res: RegisterResponse | null = await register(data)
       return res
     },
-    async Login(data: RegisterData) {
-      const res: Response = await register(data)
-      if (res.data.status === 0) {
-        this.user = res.data.data
-        localStorage.setItem('USER', JSON.stringify(res.data.data))
-      }
-    },
+    // async Login(data: RegisterData) {
+    //   const res: Response = await register(data)
+    //   if (res.data.status === 0) {
+    //     this.user = res.data.data
+    //     localStorage.setItem('USER', JSON.stringify(res.data.data))
+    //   }
+    // },
   },
 })
 

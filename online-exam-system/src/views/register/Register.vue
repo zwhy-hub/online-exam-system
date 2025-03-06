@@ -35,7 +35,7 @@ import { reactive, ref } from 'vue'
 import type { RegisterProps } from './type'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import useUserStore from '../../stores/modules/user'
-import type { RegisterData, Response } from '@/api/user/type'
+import type { RegisterData, RegisterResponse, Response } from '@/api/user/type'
 // import user from '@/mock/user'
 
 const userStore = useUserStore()
@@ -65,17 +65,23 @@ const handleRegister = async (formEl: FormInstance | undefined) => {
   formEl?.validate(async (valid) => {
     if (valid) {
       const params: RegisterData = {
-        username: registerForm.username,
-        password: registerForm.password,
-        role: registerForm.role,
+        msg: '',
+        code: '',
+        data: {
+          username: registerForm.username,
+          password: registerForm.password,
+          role: registerForm.role,
+        },
       }
-      const res: Response = await userStore.Register(params)
+      console.log(params)
+
+      const res: RegisterResponse | null = await userStore.Register(params)
       console.log(res)
 
-      if (res.data?.status === 0) {
+      if (res?.result?.status === 1) {
         ElMessage.success('注册成功')
       } else {
-        ElMessage.error(res.data.message)
+        ElMessage.error(res?.result.msg)
       }
     }
   })

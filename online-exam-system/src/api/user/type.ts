@@ -15,13 +15,26 @@ interface UserInfoData {
 }
 
 interface RegisterData {
-  username: string
-  password: string
-  role: number
+  msg: string
+  code: string
+  data: {
+    username: string
+    password: string
+    role: number
+  }
+}
+interface RegisterResponse {
+  costTime: number
+  result: {
+    status: number
+    code: number
+    msg?: string
+  }
+  data?: UserInfoData
 }
 
 interface Response {
   data: { status: number; code: number; message?: string; data?: UserInfoData }
 }
 
-export type { UserInfoData, Response, RegisterData }
+export type { UserInfoData, Response, RegisterData, RegisterResponse }
