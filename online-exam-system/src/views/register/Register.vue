@@ -8,24 +8,40 @@
       label-position="right"
       label-width="100px"
     >
+      <el-form-item class="ex-form__title">
+        <h1>注册</h1>
+        <el-icon class="ex-icon__user"><User /><Plus /></el-icon>
+      </el-form-item>
       <el-form-item label="用户名" prop="username">
-        <el-input v-model="registerForm.username" placeholder="Username"></el-input>
+        <el-input v-model="registerForm.username" placeholder="Username" clearable></el-input>
       </el-form-item>
       <el-form-item label="密码" prop="password">
-        <el-input v-model="registerForm.password" placeholder="Password"></el-input>
+        <el-input
+          v-model="registerForm.password"
+          placeholder="Password"
+          type="password"
+          show-password
+          clearable
+        ></el-input>
       </el-form-item>
       <el-form-item label="确认密码" prop="confirmPassword">
-        <el-input v-model="registerForm.confirmPassword" placeholder="Confirm Password"></el-input>
+        <el-input
+          v-model="registerForm.confirmPassword"
+          placeholder="Confirm Password"
+          type="password"
+          show-password
+          clearable
+        ></el-input>
       </el-form-item>
       <el-form-item label="角色" prop="role">
         <el-radio-group v-model="registerForm.role">
-          <el-radio label="1" value="1">学生</el-radio>
-          <el-radio label="2" value="2">教师</el-radio>
+          <el-radio :value="1">学生</el-radio>
+          <el-radio :value="2">教师</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="handleRegister(ruleFormRef)">点击注册</el-button>
-        <el-button type="text">已有帐号？点击登录</el-button>
+        <el-button link @click="handleLogin">已有帐号？点击登录</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -35,9 +51,10 @@ import { reactive, ref } from 'vue'
 import type { RegisterProps } from './type'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import useUserStore from '../../stores/modules/user'
-import type { RegisterData, RegisterResponse, Response } from '@/api/user/type'
-// import user from '@/mock/user'
+import type { RegisterData, RegisterResponse } from '@/api/user/type'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const userStore = useUserStore()
 const ruleFormRef = ref<FormInstance>()
 const registerForm = reactive<RegisterProps>({
@@ -46,21 +63,53 @@ const registerForm = reactive<RegisterProps>({
   confirmPassword: '',
   role: 1,
 })
-const rules = <FormRules>{
-  username: [
-    { required: true, message: 'Please input username', trigger: 'blur' },
-    { min: 3, max: 20, message: 'Length should be 3 to 20', trigger: 'blur' },
-  ],
-  password: [
-    { required: true, message: 'Please input password', trigger: 'blur' },
-    { min: 6, max: 20, message: 'Length should be 6 to 20', trigger: 'blur' },
-  ],
-  confirmPassword: [
-    { required: true, message: 'Please input password again', trigger: 'blur' },
-    { min: 6, max: 20, message: 'Length should be 6 to 20', trigger: 'blur' },
-  ],
-  role: [{ required: true, message: 'Please select role', trigger: 'change' }],
+
+const validateUsername = (_rule: any, value: string, callback: any) => {
+  if (!value) {
+    return callback(new Error('请输入用户名'))
+  } //只能输入数字和字母并且长度在2-12位之间
+  else if (!/^[a-zA-Z0-9]{2,12}$/.test(value)) {
+    return callback(new Error('只能输入数字和字母并且长度在2-12位之间'))
+  } else {
+    callback()
+  }
 }
+const validatePass = (_rule: any, value: string, callback: any) => {
+  if (!value) {
+    return callback(new Error('请输入密码'))
+  } else if (
+    /^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\W_!@#$%^&*`~()-+=]+$)(?![0-9\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\W_!@#$%^&*`~()-+=]/.test(
+      value,
+    )
+  ) {
+    return callback(new Error('密码必须包含数字、字母、特殊字符'))
+  } else {
+    callback()
+  }
+}
+const validateConfirmPass = (_rule: any, value: string, callback: any) => {
+  if (!value) {
+    return callback(new Error('请再次输入密码'))
+  } else if (value !== registerForm.password) {
+    return callback(new Error('两次输入密码不一致!'))
+  } else {
+    callback()
+  }
+}
+const validateRole = (_rule: any, value: string, callback: any) => {
+  if (!value) {
+    return callback(new Error('请选择角色'))
+  } else {
+    callback()
+  }
+}
+const rules = <FormRules>{
+  username: [{ validator: validateUsername, trigger: 'blur' }],
+  password: [{ validator: validatePass, trigger: 'blur' }],
+  confirmPassword: [{ validator: validateConfirmPass, trigger: 'blur' }],
+  role: [{ validator: validateRole, trigger: 'blur' }],
+}
+
 const handleRegister = async (formEl: FormInstance | undefined) => {
   formEl?.validate(async (valid) => {
     if (valid) {
@@ -73,25 +122,38 @@ const handleRegister = async (formEl: FormInstance | undefined) => {
           role: registerForm.role,
         },
       }
-      console.log(params)
-
+      // console.log(params)
       const res: RegisterResponse | null = await userStore.Register(params)
-      console.log(res)
-
+      // console.log(res)
       if (res?.result?.status === 1) {
         ElMessage.success('注册成功')
+        handleLogin()
       } else {
         ElMessage.error(res?.result.msg)
       }
     }
   })
 }
+const handleLogin = () => {
+  router.push('/login')
+}
 </script>
 <style lang="scss" scoped>
 @include b(form) {
-  border: 1px solid #ebeef5;
+  border: 1px solid #000;
+  border-radius: 4px;
   width: 600px;
   padding: 100px;
   margin: 100px auto;
+}
+@include b(icon) {
+  @include e(user) {
+    font-size: 50px;
+    color: #409eff;
+  }
+}
+.ex-form__title {
+  height: 50px;
+  line-height: 50px;
 }
 </style>
