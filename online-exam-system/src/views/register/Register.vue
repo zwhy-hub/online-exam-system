@@ -104,10 +104,10 @@ const validateRole = (_rule: any, value: string, callback: any) => {
   }
 }
 const rules = <FormRules>{
-  username: [{ validator: validateUsername, trigger: 'blur' }],
-  password: [{ validator: validatePass, trigger: 'blur' }],
-  confirmPassword: [{ validator: validateConfirmPass, trigger: 'blur' }],
-  role: [{ validator: validateRole, trigger: 'blur' }],
+  username: [{ validator: validateUsername, trigger: 'blur', required: true }],
+  password: [{ validator: validatePass, trigger: 'blur', required: true }],
+  confirmPassword: [{ validator: validateConfirmPass, trigger: 'blur', required: true }],
+  role: [{ validator: validateRole, trigger: 'blur', required: true }],
 }
 
 const handleRegister = async (formEl: FormInstance | undefined) => {

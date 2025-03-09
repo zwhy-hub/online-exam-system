@@ -6,19 +6,13 @@ let useStoer = useUserStore(pinia)
 
 router.beforeEach((to: any, _from: any, next: any) => {
   const user = useStoer.user
-  if (user && user.id) {
-    if (to.path == '/login') {
-      next({ path: '/' })
-    } else {
+  if (to.meta.isLogin) {
+    if (user) {
       next()
+    } else {
+      next({ path: '/login' })
     }
   } else {
-    if (to.path === '/login' || to.path === '/register') {
-      next()
-    } else {
-      {
-        next({ path: '/login' })
-      }
-    }
+    next()
   }
 })

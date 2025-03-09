@@ -13,7 +13,11 @@ interface UserInfoData {
   lock_flag: number
   del_flag: number
 }
-
+interface Result {
+  status: number
+  code: number
+  msg?: string
+}
 interface RegisterData {
   msg: string
   code: string
@@ -25,16 +29,21 @@ interface RegisterData {
 }
 interface RegisterResponse {
   costTime: number
-  result: {
-    status: number
-    code: number
-    msg?: string
-  }
+  result: Result
   data?: UserInfoData
 }
-
+interface LoginData {
+  username: string
+  passwrd: string
+  code: string
+}
+interface LoginRespose {
+  costTime: number
+  data: string
+  result: Result
+}
 interface Response {
   data: { status: number; code: number; message?: string; data?: UserInfoData }
 }
 
-export type { UserInfoData, Response, RegisterData, RegisterResponse }
+export type { UserInfoData, Response, RegisterData, RegisterResponse, LoginData, LoginRespose }

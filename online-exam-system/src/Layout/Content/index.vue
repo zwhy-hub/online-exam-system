@@ -1,6 +1,6 @@
 <template>
   <div class="ex-content">
-    <div class="ex-content__items" v-for="item in 100" :key="item">{{ item }}</div>
+    <router-view></router-view>
   </div>
 </template>
 <script setup lang="ts"></script>
@@ -8,7 +8,7 @@
 @include b(content) {
   flex: 1;
   overflow: auto;
-  margin-top: 70px;
+  margin-top: 60px;
   @include e(items) {
     padding: 10px;
     margin: 10px;

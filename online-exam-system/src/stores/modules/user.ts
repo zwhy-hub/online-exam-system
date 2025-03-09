@@ -13,13 +13,6 @@ const useUserStore = defineStore('User', {
       const res: RegisterResponse | null = await register(data)
       return res
     },
-    // async Login(data: RegisterData) {
-    //   const res: Response = await register(data)
-    //   if (res.data.status === 0) {
-    //     this.user = res.data.data
-    //     localStorage.setItem('USER', JSON.stringify(res.data.data))
-    //   }
-    // },
   },
 })
 
