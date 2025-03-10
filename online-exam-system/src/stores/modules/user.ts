@@ -5,7 +5,7 @@ import type { RegisterData, RegisterResponse } from '@/api/user/type'
 
 const useUserStore = defineStore('User', {
   state: (): userState => ({
-    user: JSON.parse(localStorage.getItem('USER') as string),
+    user: JSON.parse(localStorage.getItem('USER') as any),
   }),
 
   actions: {

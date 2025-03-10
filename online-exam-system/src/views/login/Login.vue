@@ -64,23 +64,16 @@ const rules = {
 const handleLogin = (formEl: FormInstance | undefined) => {
   formEl?.validate((valid) => {
     if (valid) {
-      localStorage.setItem('USER', JSON.stringify(loginForm))
+      localStorage.setItem(
+        'USER',
+        JSON.stringify({
+          id: 1,
+          role: 4,
+          ...loginForm,
+        }),
+      )
       ElMessage.success('登陆成功')
-      userStore.user = {
-        id: 1,
-        username: '1',
-        password: '1',
-        name: '1',
-        salt: '1',
-        phone: '1',
-        email: '1',
-        img: '1',
-        role: 1,
-        create_time: '1',
-        update_time: '1',
-        lock_flag: 1,
-        del_flag: 1,
-      }
+
       router.push('/')
     }
   })

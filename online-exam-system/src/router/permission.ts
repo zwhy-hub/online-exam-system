@@ -12,6 +12,18 @@ router.beforeEach((to: any, _from: any, next: any) => {
     } else {
       next({ path: '/login' })
     }
+  } else if (to.meta.isAdmin) {
+    if (user?.role === 2 || user?.role === 3 || user?.role === 4) {
+      next()
+    } else {
+      next({ path: '/404' })
+    }
+  } else if (to.meta.isAdmin) {
+    if (user?.role === 4) {
+      next()
+    } else {
+      next({ path: '/404' })
+    }
   } else {
     next()
   }

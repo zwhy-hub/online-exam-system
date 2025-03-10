@@ -12,11 +12,11 @@
         <div class="ex-left__logo">在线考试系统</div>
       </el-menu-item>
       <el-menu-item index="/">首页</el-menu-item>
-      <el-menu-item index="/examList">考试列表</el-menu-item>
-      <el-menu-item index="/score">我的成绩</el-menu-item>
-      <el-menu-item index="/teacherBack">教师入口</el-menu-item>
-      <el-menu-item index="/back">后台入口</el-menu-item>
-      <el-menu-item index="/reTeacher">关联教师</el-menu-item>
+      <el-menu-item index="/examList" v-if="isStudent">考试列表</el-menu-item>
+      <el-menu-item index="/score" v-if="isStudent">我的成绩</el-menu-item>
+      <el-menu-item index="/manage/teacherHome" v-if="isTeacher">教师入口</el-menu-item>
+      <el-menu-item index="/manage/adminHome" v-if="isAdmin">后台入口</el-menu-item>
+      <el-menu-item index="/reTeacher" v-if="isStudent">关联教师</el-menu-item>
       <el-sub-menu index="/user">
         <template #title>用户</template>
         <el-menu-item index="/user">个人资料</el-menu-item>
@@ -28,11 +28,20 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import useUserStore from '@/stores/modules/user'
 
+const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter()
 const activeIndex = ref(route.path)
-
+const currentUser = ref(userStore.user)
+const isAdmin = ref(
+  currentUser ? currentUser?.value?.role === 3 || currentUser?.value?.role === 4 : false,
+)
+const isTeacher = ref(currentUser ? currentUser?.value?.role === 2 : false)
+const isStudent = ref(
+  currentUser ? currentUser?.value?.role === 1 || currentUser?.value?.role === 4 : false,
+)
 const handleSelect = (key: string) => {
   activeIndex.value = key
 }
@@ -42,10 +51,16 @@ watch(
   () => route.path,
   (newPath) => {
     activeIndex.value = newPath
+    if (newPath.startsWith('/manage') && isAdmin.value) {
+      activeIndex.value = '/manage/adminHome'
+    } else if (newPath.startsWith('/manage') && isTeacher.value) {
+      activeIndex.value = '/manage/teacherHome'
+    }
   },
 )
 const handleLogout = () => {
-  console.log('退出')
+  localStorage.removeItem('USER')
+  userStore.user = undefined
   router.push('/login')
 }
 </script>

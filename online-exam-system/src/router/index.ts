@@ -30,22 +30,22 @@ const router = createRouter({
             isLogin: true,
           },
         },
-        {
-          path: 'back',
-          name: 'back',
-          component: () => import('../views/back/index.vue'),
-          meta: {
-            isLogin: true,
-          },
-        },
-        {
-          path: 'teacherBack',
-          name: 'teacherBack',
-          component: () => import('../views/teacherBack/index.vue'),
-          meta: {
-            isLogin: true,
-          },
-        },
+        // {
+        //   path: 'back',
+        //   name: 'back',
+        //   component: () => import('../views/back/index.vue'),
+        //   meta: {
+        //     isLogin: true,
+        //   },
+        // },
+        // {
+        //   path: 'teacherBack',
+        //   name: 'teacherBack',
+        //   component: () => import('../views/teacherBack/index.vue'),
+        //   meta: {
+        //     isLogin: true,
+        //   },
+        // },
         {
           path: 'reTeacher',
           name: 'reTeacher',
@@ -71,9 +71,17 @@ const router = createRouter({
           },
           children: [
             {
-              path: 'home',
-              name: 'manageHome',
-              component: () => import('../manageViews/home/index.vue'),
+              path: 'adminHome',
+              name: 'adminHome',
+              component: () => import('../manageViews/home/adminHome.vue'),
+              meta: {
+                isAdmin: true,
+              },
+            },
+            {
+              path: 'teacherHome',
+              name: 'teacherHome',
+              component: () => import('../manageViews/home/teacherHome.vue'),
               meta: {
                 isAdmin: true,
               },
@@ -85,6 +93,32 @@ const router = createRouter({
               meta: {
                 isAdmin: true,
               },
+              children: [
+                {
+                  path: '__userManage',
+                  name: '__userManage',
+                  component: () => import('../manageViews/userManage/userManage/index.vue'),
+                  meta: {
+                    isAdmin: true,
+                  },
+                },
+                {
+                  path: '__orderManage',
+                  name: '__orderManage',
+                  component: () => import('../manageViews/userManage/orderManage/index.vue'),
+                  meta: {
+                    isAdmin: true,
+                  },
+                },
+                {
+                  path: '__classManage',
+                  name: '__classManage',
+                  component: () => import('../manageViews/userManage/classManage/index.vue'),
+                  meta: {
+                    isAdmin: true,
+                  },
+                },
+              ],
             },
             {
               path: 'topicManage',
@@ -93,6 +127,25 @@ const router = createRouter({
               meta: {
                 isAdmin: true,
               },
+              children: [
+                {
+                  path: '__topicManage',
+                  name: '__topicManage',
+                  component: () => import('../manageViews/topicManage/topicManage/index.vue'),
+                  meta: {
+                    isAdmin: true,
+                  },
+                },
+                {
+                  path: '__questionBankManage',
+                  name: '__questionBankManage',
+                  component: () =>
+                    import('../manageViews/topicManage/questionBankManage/index.vue'),
+                  meta: {
+                    isAdmin: true,
+                  },
+                },
+              ],
             },
             {
               path: 'examManage',
@@ -101,13 +154,39 @@ const router = createRouter({
               meta: {
                 isAdmin: true,
               },
+              children: [
+                {
+                  path: '__examManage',
+                  name: '__examManage',
+                  component: () => import('../manageViews/examManage/examManage/index.vue'),
+                  meta: {
+                    isAdmin: true,
+                  },
+                },
+                {
+                  path: '__scoreManage',
+                  name: '__scoreManage',
+                  component: () => import('../manageViews/examManage/scoreManage/index.vue'),
+                  meta: {
+                    isAdmin: true,
+                  },
+                },
+                {
+                  path: '__testPaperManage',
+                  name: '__testPaperManage',
+                  component: () => import('../manageViews/examManage/testPaperManage/index.vue'),
+                  meta: {
+                    isAdmin: true,
+                  },
+                },
+              ],
             },
             {
               path: 'adminManage',
               name: 'adminManage',
               component: () => import('../manageViews/adminManage/index.vue'),
               meta: {
-                isAdmin: true,
+                isSuperAdmin: true,
               },
             },
             {
@@ -115,7 +194,7 @@ const router = createRouter({
               name: 'noticeManage',
               component: () => import('../manageViews/noticeManage/index.vue'),
               meta: {
-                isAdmin: true,
+                isSuperAdmin: true,
               },
             },
             {
@@ -123,7 +202,7 @@ const router = createRouter({
               name: 'logData',
               component: () => import('../manageViews/logData/index.vue'),
               meta: {
-                isAdmin: true,
+                isSuperAdmin: true,
               },
             },
           ],
