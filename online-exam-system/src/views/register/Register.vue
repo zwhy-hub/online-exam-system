@@ -129,7 +129,7 @@ const handleRegister = async (formEl: FormInstance | undefined) => {
         ElMessage.success('注册成功')
         handleLogin()
       } else {
-        ElMessage.error(res?.result.msg)
+        ElMessage.error(res?.result.msg || '注册失败')
       }
     }
   })

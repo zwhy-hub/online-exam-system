@@ -17,11 +17,12 @@
       <el-menu-item index="/manage/teacherHome" v-if="isTeacher">教师入口</el-menu-item>
       <el-menu-item index="/manage/adminHome" v-if="isAdmin">后台入口</el-menu-item>
       <el-menu-item index="/reTeacher" v-if="isStudent">关联教师</el-menu-item>
-      <el-sub-menu index="/user">
+      <el-sub-menu index="/user" v-if="currentUser">
         <template #title>用户</template>
         <el-menu-item index="/user">个人资料</el-menu-item>
         <el-menu-item @click="handleLogout">退出登录</el-menu-item>
       </el-sub-menu>
+      <el-menu-item index="/login" v-if="!currentUser">登录</el-menu-item>
     </el-menu>
   </div>
 </template>

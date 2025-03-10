@@ -36,6 +36,7 @@ import { ElMessage, type FormInstance } from 'element-plus'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/modules/user'
+import type { LoginResponse } from '@/api/user/type'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -62,19 +63,21 @@ const rules = {
 }
 
 const handleLogin = (formEl: FormInstance | undefined) => {
-  formEl?.validate((valid) => {
+  formEl?.validate(async (valid) => {
     if (valid) {
-      localStorage.setItem(
-        'USER',
-        JSON.stringify({
-          id: 1,
-          role: 4,
-          ...loginForm,
-        }),
-      )
-      ElMessage.success('登陆成功')
-
-      router.push('/')
+      const params = {
+        ...loginForm,
+        code: '1',
+      }
+      console.log(params)
+      const res: LoginResponse | null = await userStore.Login(params)
+      console.log(res)
+      if (res?.result?.status === 1) {
+        localStorage.setItem('USER', JSON.stringify(res.result))
+        ElMessage.success('登录成功')
+      } else {
+        ElMessage.error(res?.result.msg || '登录失败')
+      }
     }
   })
 }

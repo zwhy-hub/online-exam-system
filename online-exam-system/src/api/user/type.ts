@@ -34,16 +34,22 @@ interface RegisterResponse {
 }
 interface LoginData {
   username: string
-  passwrd: string
+  password: string
   code: string
 }
-interface LoginRespose {
+interface LoginResponse {
   costTime: number
   data: string
-  result: Result
+  result: {
+    status: number
+    code: number
+    msg?: string
+    id: number
+    role: number
+  }
 }
 interface Response {
   data: { status: number; code: number; message?: string; data?: UserInfoData }
 }
 
-export type { UserInfoData, Response, RegisterData, RegisterResponse, LoginData, LoginRespose }
+export type { UserInfoData, Response, RegisterData, RegisterResponse, LoginData, LoginResponse }
