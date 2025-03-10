@@ -73,8 +73,11 @@ const handleLogin = (formEl: FormInstance | undefined) => {
       const res: LoginResponse | null = await userStore.Login(params)
       console.log(res)
       if (res?.result?.status === 1) {
-        localStorage.setItem('USER', JSON.stringify(res.result))
+        const { id, role, username } = res.result
+        localStorage.setItem('USER', JSON.stringify({ id, role, username }))
+        userStore.user = { id, role, username }
         ElMessage.success('登录成功')
+        router.push('/')
       } else {
         ElMessage.error(res?.result.msg || '登录失败')
       }

@@ -1,7 +1,7 @@
 interface UserInfoData {
   id: number
   username: string
-  password: string
+  password?: string
   name?: string
   salt?: string
   phone?: string
@@ -46,6 +46,7 @@ interface LoginResponse {
     msg?: string
     id: number
     role: number
+    username: string
   }
 }
 interface Response {
