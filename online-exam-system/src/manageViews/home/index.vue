@@ -91,7 +91,7 @@ const handleClose = (key: string, keyPath: string[]) => {
 <style lang="scss" scoped>
 @include b(container) {
   display: flex;
-  height: 86vh;
+  height: 89vh;
   @include e(content) {
     flex: 1;
   }

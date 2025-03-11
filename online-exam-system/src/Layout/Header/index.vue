@@ -18,7 +18,7 @@
       <el-menu-item index="/manage/adminHome" v-if="isAdmin">后台入口</el-menu-item>
       <el-menu-item index="/reTeacher" v-if="isStudent">关联教师</el-menu-item>
       <el-sub-menu index="/user" v-if="currentUser">
-        <template #title>用户</template>
+        <template #title>{{ userStore?.user?.username || ' 用户' }}</template>
         <el-menu-item index="/user">个人资料</el-menu-item>
         <el-menu-item @click="handleLogout">退出登录</el-menu-item>
       </el-sub-menu>
@@ -40,9 +40,7 @@ const isAdmin = ref(
   currentUser ? currentUser?.value?.role === 3 || currentUser?.value?.role === 4 : false,
 )
 const isTeacher = ref(currentUser ? currentUser?.value?.role === 2 : false)
-const isStudent = ref(
-  currentUser ? currentUser?.value?.role === 1 || currentUser?.value?.role === 4 : false,
-)
+const isStudent = ref(currentUser ? currentUser?.value?.role === 1 : false)
 const handleSelect = (key: string) => {
   activeIndex.value = key
 }

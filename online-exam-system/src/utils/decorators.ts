@@ -42,4 +42,44 @@ const Post = (url: string) => {
   }
 }
 
-export { Get, Post }
+const Delete = (url: string) => {
+  return function (
+    target: any,
+    context: ClassMethodDecoratorContext<any, (this: any, ...args: any[]) => any>,
+  ) {
+    context.addInitializer(function () {
+      const originalMethod = this[context.name]
+
+      this[context.name] = async function (...args: any[]) {
+        try {
+          const requestUrl = `${url}${args[0]}`
+          // console.log(`POST ${requestUrl}`)
+          const response = await req.post(requestUrl)
+          return response
+        } catch (error) {
+          console.error(`POST ${url} API error:`, error)
+          return originalMethod?.apply(this, args)
+        }
+      }
+    })
+  }
+}
+
+const Param = (param: string) => {
+  return function (
+    target: any,
+    context: ClassMethodDecoratorContext<any, (this: any, ...args: any[]) => any>,
+    index: number,
+  ) {
+    context.addInitializer(function () {
+      const originalMethod = this[context.name]
+
+      this[context.name] = async function (...args: any[]) {
+        args[0][param] = args[index]
+        return originalMethod?.apply(this, args)
+      }
+    })
+  }
+}
+
+export { Get, Post, Delete, Param }
