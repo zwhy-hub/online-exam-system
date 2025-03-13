@@ -29,6 +29,12 @@ class AuthService {
   async fetchUserList(data: types.FetchUserList): Promise<types.FetchUserListResponse | null> {
     return null
   }
+
+  //添加用户
+  @Post('/user/saveUser')
+  async addUser(data: types.AddUserData): Promise<types.BaseResponse | null> {
+    return null
+  }
 }
 
 export default new AuthService()

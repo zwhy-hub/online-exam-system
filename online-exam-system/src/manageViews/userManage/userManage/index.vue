@@ -65,8 +65,8 @@
         <el-table-column label="用户名" prop="username"></el-table-column>
         <el-table-column label="姓名" prop="name"></el-table-column>
         <el-table-column label="头像" prop="img"></el-table-column>
-        <el-table-column label="邮箱" prop="email"></el-table-column>
-        <el-table-column label="手机号" prop="phone"></el-table-column>
+        <el-table-column label="邮箱" prop="email" show-overflow-tooltip></el-table-column>
+        <el-table-column label="手机号" prop="phone" show-overflow-tooltip></el-table-column>
         <el-table-column label="注册时间" min-width="120px">
           <template #default="scope">
             <div style="display: flex; align-items: center">
@@ -79,9 +79,13 @@
         <el-table-column label="角色" prop="role"></el-table-column>
         <el-table-column label="操作" min-width="120px">
           <template #default="scope">
-            <el-button size="small"> 编辑 </el-button>
-            <el-button size="small"> 删除 </el-button>
-            <el-button size="small"> 解封 </el-button>
+            <el-button size="small" type="primary" plain> 编辑 </el-button>
+            <el-popconfirm title="Are you sure to delete this?">
+              <template #reference>
+                <el-button @click="handleDelete" plain type="danger" size="small">删除</el-button>
+              </template>
+            </el-popconfirm>
+            <el-button size="small" type="primary" plain> 解封 </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -96,6 +100,60 @@
         style="margin-top: 10px"
       />
     </div>
+
+    <el-dialog v-model="addDialogVisible" title="新增用户" width="500" :before-close="handleClose">
+      <el-form
+        ref="addFormListRef"
+        style="max-width: 600px"
+        :model="addFormList"
+        status-icon
+        :rules="rules"
+        label-width="auto"
+        class="demo-addFormList"
+      >
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addFormList.username" placeholder="请输入用户名" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input
+            v-model="addFormList.password"
+            placeholder="请输入密码"
+            show-password
+            clearable
+            type="password"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="addFormList.name" placeholder="请输入姓名" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addFormList.email" placeholder="请输入邮箱" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="addFormList.phone" placeholder="请输入手机号" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="角色" prop="role">
+          <el-select v-model="addFormList.role" placeholder="请选择角色">
+            <el-option label="学生" :value="1" />
+            <el-option label="老师" :value="2" />
+            <el-option label="管理员" :value="3" />
+            <el-option label="超级管理员" :value="4" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="锁定状态" prop="lockFlag">
+          <el-select v-model="addFormList.lockFlag" placeholder="请选择锁定状态">
+            <el-option label="未锁定" :value="0" />
+            <el-option label="已锁定" :value="1" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="addDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleDialogAdd(addFormListRef)"> 确定 </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 <script setup lang="ts">
@@ -104,10 +162,12 @@ import type {
   SearchUserForm,
   FetchUserList,
   FetchUserListResponse,
+  AddUserData,
+  BaseResponse,
 } from '@/api/user/type'
 import { onMounted, ref } from 'vue'
 import useUserStore from '@/stores/modules/user'
-import type { TableInstance } from 'element-plus'
+import { ElMessage, ElMessageBox, type FormInstance, type TableInstance } from 'element-plus'
 
 const multipleTableRef = ref<TableInstance>()
 const multipleSelection = ref<UserInfoData[]>([])
@@ -126,12 +186,74 @@ const searchForm = ref<SearchUserForm>({
   startTime: '',
 })
 const UserList = ref<UserInfoData[]>([])
+const addDialogVisible = ref(false)
+const addFormList = ref({
+  username: '',
+  password: '',
+  name: '',
+  email: '',
+  phone: '',
+  role: 1,
+  lockFlag: 0,
+})
+const addFormListRef = ref()
+const usernameValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
+  if (value === '') {
+    callback(new Error('请输入用户名'))
+  } //长度大于2《12
+  else if (value.length < 2 || value.length > 12) {
+    callback(new Error('用户名长度在2-12之间'))
+  } else {
+    callback()
+  }
+}
+const passwordValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
+  if (value === '') {
+    callback(new Error('请输入密码'))
+  } else if (value.length < 6 || value.length > 12) {
+    callback(new Error('密码长度在6-12之间'))
+  } else {
+    callback()
+  }
+}
+const nameValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
+  if (value === '') {
+    callback(new Error('请输入姓名'))
+  } else if (value.length < 2 || value.length > 12) {
+    callback(new Error('姓名长度在2-12之间'))
+  } else {
+    callback()
+  }
+}
+const emailValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
+  if (value === '') {
+    callback(new Error('请输入邮箱'))
+  } else {
+    callback()
+  }
+}
+const phoneValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
+  if (value === '') {
+    callback(new Error('请输入手机号'))
+  } else {
+    callback()
+  }
+}
+const rules = {
+  username: [{ required: true, validate: usernameValidate, trigger: 'blur' }],
+  password: [{ required: true, validate: passwordValidate, trigger: 'blur' }],
+  name: [{ required: true, validate: nameValidate, trigger: 'blur' }],
+  email: [{ required: true, validate: emailValidate, trigger: 'blur' }],
+  phone: [{ required: true, validate: phoneValidate, trigger: 'blur' }],
+}
 
 const handleSizeChange = (val: number) => {
   pageSize.value = val
+  handleSearch()
 }
 const handleCurrentChange = (val: number) => {
   currentPage.value = val
+  handleSearch()
 }
 const handleSelectionChange = (val: UserInfoData[]) => {
   multipleSelection.value = val
@@ -154,7 +276,14 @@ const handleSearch = async () => {
     if (res?.result.status === 1) {
       UserList.value = res.data.records
       total.value = res.data.total
-      console.log(UserList.value)
+      // console.log(UserList.value)
+      // searchForm.value = {
+      //   lockFlag: 0,
+      //   username: '',
+      //   name: '',
+      //   startTime: '',
+      //   role: 1,
+      // }
     } else {
       console.log(res?.result.msg || '查询失败')
     }
@@ -163,12 +292,53 @@ const handleSearch = async () => {
     console.log(error)
   }
 }
-const handleReset = () => {}
+const handleReset = () => {
+  searchForm.value = {
+    lockFlag: 0,
+    username: '',
+    name: '',
+    startTime: '',
+    role: 1,
+  }
+  handleSearch()
+}
 const handleDelete = async () => {
   const res = await userStore.DeleteUserByid(17)
   console.log(res)
 }
-const handleAdd = () => {}
+const handleAdd = () => {
+  addDialogVisible.value = true
+}
+const handleClose = (done: () => void) => {
+  ElMessageBox.confirm('Are you sure to close this dialog?')
+    .then(() => {
+      done()
+    })
+    .catch(() => {
+      // catch error
+    })
+}
+const handleDialogAdd = (formEl: FormInstance | undefined) => {
+  formEl?.validate(async (valid) => {
+    if (valid) {
+      const params: AddUserData = {
+        msg: '',
+        code: '',
+        data: {
+          ...addFormList.value,
+        },
+      }
+      // console.log(params)
+      const res: BaseResponse | null = await userStore.AddUser(params)
+      // console.log(res)
+      if (res?.result.status === 1) {
+        ElMessage.success('添加成功')
+        handleSearch()
+        addDialogVisible.value = false
+      }
+    }
+  })
+}
 
 onMounted(() => {
   handleSearch()

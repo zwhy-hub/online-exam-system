@@ -10,6 +10,7 @@ import type {
   RegisterResponse,
   FetchUserList,
   FetchUserListResponse,
+  AddUserData,
 } from '@/api/user/type'
 
 const useUserStore = defineStore('User', {
@@ -61,6 +62,16 @@ const useUserStore = defineStore('User', {
     // 获取用户列表
     async FetchUserList(data: FetchUserList) {
       const res: FetchUserListResponse | null = await AuthService.fetchUserList(data)
+      if (!res) {
+        console.log('获取用户列表接口返回为空')
+        return null
+      }
+      return res
+    },
+
+    //添加用户
+    async AddUser(data: AddUserData) {
+      const res: BaseResponse | null = await AuthService.addUser(data)
       if (!res) {
         console.log('获取用户列表接口返回为空')
         return null

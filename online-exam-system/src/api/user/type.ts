@@ -102,6 +102,12 @@ interface FetchUserListResponse {
     pages: number
   }
 }
+//添加用户
+interface AddUserData {
+  msg: string
+  code: string
+  data: UserInfoData
+}
 
 export type {
   UserInfoData,
@@ -115,4 +121,5 @@ export type {
   AddAdminInfo,
   FetchUserList,
   FetchUserListResponse,
+  AddUserData,
 }
