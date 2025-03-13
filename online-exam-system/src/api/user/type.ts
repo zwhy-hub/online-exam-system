@@ -102,13 +102,33 @@ interface FetchUserListResponse {
     pages: number
   }
 }
-//添加用户
-interface AddUserData {
+// //添加用户
+// interface AddUserData {
+//   msg: string
+//   code: string
+//   data: UserInfoData
+// }
+// //编辑用户
+// interface EditUserData {
+//   msg: string
+//   code: string
+//   data: Omit<UserInfoData, 'phone'> & {
+//     phone: string
+//   }
+// }
+interface OperateUser {
   msg: string
   code: string
-  data: UserInfoData
+  data: {
+    username: string
+    name?: string
+    password: string
+    email?: string
+    phone: string
+    role: number
+    lockFlag: number
+  }
 }
-
 export type {
   UserInfoData,
   BaseResponse,
@@ -121,5 +141,7 @@ export type {
   AddAdminInfo,
   FetchUserList,
   FetchUserListResponse,
-  AddUserData,
+  // AddUserData,
+  // EditUserData,
+  OperateUser,
 }

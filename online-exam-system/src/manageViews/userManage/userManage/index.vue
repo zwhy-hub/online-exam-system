@@ -43,7 +43,13 @@
       <div class="ex-header__footer">
         <el-button type="primary" plain @click="handleSearch" style="width: 100px">查询</el-button>
         <el-button type="primary" plain @click="handleReset" style="width: 100px">重置</el-button>
-        <el-button type="danger" plain @click="handleDelete" style="width: 100px">
+        <el-button
+          type="danger"
+          plain
+          @click="handleDelete"
+          style="width: 100px"
+          :disabled="multipleSelection.length === 0"
+        >
           批量删除
         </el-button>
         <el-button type="primary" plain @click="handleAdd" style="width: 100px">新增</el-button>
@@ -52,12 +58,12 @@
     <div class="ex-content">
       <el-table
         :data="UserList"
-        style="width: 100%; min-width: 800px"
+        style="width: 100%"
         border
         highlight-current-row
         :fit="true"
         :table-layout="'auto'"
-        max-height="calc(100vh - 400px)"
+        max-height="calc(100vh - 300px)"
         @selection-change="handleSelectionChange"
         ref="multipleTableRef"
       >
@@ -79,13 +85,20 @@
         <el-table-column label="角色" prop="role"></el-table-column>
         <el-table-column label="操作" min-width="120px">
           <template #default="scope">
-            <el-button size="small" type="primary" plain> 编辑 </el-button>
-            <el-popconfirm title="Are you sure to delete this?">
-              <template #reference>
-                <el-button @click="handleDelete" plain type="danger" size="small">删除</el-button>
-              </template>
-            </el-popconfirm>
-            <el-button size="small" type="primary" plain> 解封 </el-button>
+            <el-button size="small" type="primary" plain @click="handleEdit(scope.row)">
+              编辑
+            </el-button>
+            <el-button @click="handleDeleteById(scope.row.id)" plain type="danger" size="small">
+              删除
+            </el-button>
+            <el-button
+              size="small"
+              type="primary"
+              plain
+              @click="handleLock(scope.row.id, scope.row.lockFlag)"
+            >
+              {{ scope.row.lockFlag ? '解封' : '封禁' }}
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -101,7 +114,7 @@
       />
     </div>
 
-    <el-dialog v-model="addDialogVisible" title="新增用户" width="500" :before-close="handleClose">
+    <!-- <el-dialog v-model="addDialogVisible" title="新增用户" width="500" :before-close="handleClose">
       <el-form
         ref="addFormListRef"
         style="max-width: 600px"
@@ -153,6 +166,71 @@
           <el-button type="primary" @click="handleDialogAdd(addFormListRef)"> 确定 </el-button>
         </div>
       </template>
+    </el-dialog> -->
+
+    <el-dialog
+      v-model="operateDialogVisible"
+      :title="operateId ? '编辑用户' : '新增用户'"
+      width="500"
+      :before-close="handleClose"
+    >
+      <el-form
+        ref="operateFormListRef"
+        style="max-width: 600px"
+        :model="operateFormList"
+        status-icon
+        :rules="rules"
+        label-width="auto"
+        class="ex-operateFormList"
+      >
+        <el-form-item label="用户名" prop="username">
+          <el-input
+            v-model="operateFormList.username"
+            placeholder="请输入用户名"
+            clearable
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input
+            v-model="operateFormList.password"
+            placeholder="请输入密码"
+            show-password
+            clearable
+            type="password"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="operateFormList.name" placeholder="请输入姓名" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="operateFormList.email" placeholder="请输入邮箱" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="operateFormList.phone" placeholder="请输入手机号" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="角色" prop="role">
+          <el-select v-model="operateFormList.role" placeholder="请选择角色">
+            <el-option label="学生" :value="1" />
+            <el-option label="老师" :value="2" />
+            <el-option label="管理员" :value="3" />
+            <el-option label="超级管理员" :value="4" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="锁定状态" prop="lockFlag">
+          <el-select v-model="operateFormList.lockFlag" placeholder="请选择锁定状态">
+            <el-option label="未锁定" :value="0" />
+            <el-option label="已锁定" :value="1" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="operateDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleDialogOperate(operateFormListRef)">
+            确定
+          </el-button>
+        </div>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -162,8 +240,8 @@ import type {
   SearchUserForm,
   FetchUserList,
   FetchUserListResponse,
-  AddUserData,
   BaseResponse,
+  OperateUser,
 } from '@/api/user/type'
 import { onMounted, ref } from 'vue'
 import useUserStore from '@/stores/modules/user'
@@ -174,9 +252,9 @@ const multipleSelection = ref<UserInfoData[]>([])
 const selectable = (row: UserInfoData) => {
   return row.role !== 4
 }
-const currentPage = ref(1)
-const pageSize = ref(10)
-const total = ref(0)
+const currentPage = ref<number>(1)
+const pageSize = ref<number>(5)
+const total = ref<number>(0)
 const userStore = useUserStore()
 const searchForm = ref<SearchUserForm>({
   role: 1,
@@ -186,8 +264,8 @@ const searchForm = ref<SearchUserForm>({
   startTime: '',
 })
 const UserList = ref<UserInfoData[]>([])
-const addDialogVisible = ref(false)
-const addFormList = ref({
+const operateDialogVisible = ref<boolean>(false)
+const operateFormList = ref({
   username: '',
   password: '',
   name: '',
@@ -196,7 +274,8 @@ const addFormList = ref({
   role: 1,
   lockFlag: 0,
 })
-const addFormListRef = ref()
+const operateFormListRef = ref()
+const operateId = ref<number | null>(null)
 const usernameValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
   if (value === '') {
     callback(new Error('请输入用户名'))
@@ -216,22 +295,22 @@ const passwordValidate = (_rule: any, value: string, callback: (arg0?: Error) =>
     callback()
   }
 }
-const nameValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
-  if (value === '') {
-    callback(new Error('请输入姓名'))
-  } else if (value.length < 2 || value.length > 12) {
-    callback(new Error('姓名长度在2-12之间'))
-  } else {
-    callback()
-  }
-}
-const emailValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
-  if (value === '') {
-    callback(new Error('请输入邮箱'))
-  } else {
-    callback()
-  }
-}
+// const nameValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
+//   if (value === '') {
+//     callback(new Error('请输入姓名'))
+//   } else if (value.length < 2 || value.length > 12) {
+//     callback(new Error('姓名长度在2-12之间'))
+//   } else {
+//     callback()
+//   }
+// }
+// const emailValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
+//   if (value === '') {
+//     callback(new Error('请输入邮箱'))
+//   } else {
+//     callback()
+//   }
+// }
 const phoneValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
   if (value === '') {
     callback(new Error('请输入手机号'))
@@ -242,8 +321,8 @@ const phoneValidate = (_rule: any, value: string, callback: (arg0?: Error) => vo
 const rules = {
   username: [{ required: true, validate: usernameValidate, trigger: 'blur' }],
   password: [{ required: true, validate: passwordValidate, trigger: 'blur' }],
-  name: [{ required: true, validate: nameValidate, trigger: 'blur' }],
-  email: [{ required: true, validate: emailValidate, trigger: 'blur' }],
+  // name: [{ required: true, validate: nameValidate, trigger: 'blur' }],
+  // email: [{ required: true, validate: emailValidate, trigger: 'blur' }],
   phone: [{ required: true, validate: phoneValidate, trigger: 'blur' }],
 }
 
@@ -302,42 +381,134 @@ const handleReset = () => {
   }
   handleSearch()
 }
-const handleDelete = async () => {
-  const res = await userStore.DeleteUserByid(17)
-  console.log(res)
-}
+const handleDelete = () => {}
 const handleAdd = () => {
-  addDialogVisible.value = true
+  operateDialogVisible.value = true
+}
+const handleEdit = (row: any) => {
+  operateId.value = row.id
+  operateFormList.value = {
+    username: row.username,
+    password: row.password,
+    name: row.name,
+    email: row.email || '',
+    phone: row.phone,
+    role: row.role,
+    lockFlag: row.lockFlag,
+  }
+  operateDialogVisible.value = true
 }
 const handleClose = (done: () => void) => {
-  ElMessageBox.confirm('Are you sure to close this dialog?')
+  ElMessageBox.confirm('确认要关闭吗?')
     .then(() => {
       done()
     })
-    .catch(() => {
-      // catch error
-    })
+    .catch(() => {})
 }
-const handleDialogAdd = (formEl: FormInstance | undefined) => {
-  formEl?.validate(async (valid) => {
+const addUserCommit = async () => {
+  try {
+    const params: OperateUser = {
+      msg: '',
+      code: '',
+      data: {
+        ...operateFormList.value,
+      },
+    }
+    // console.log(params)
+    const res: BaseResponse | null = await userStore.AddUser(params)
+    // console.log(res)
+    if (res?.result.status === 1) {
+      ElMessage.success('添加成功')
+      operateDialogVisible.value = false
+      handleReset()
+    } else {
+      ElMessage.warning(res?.result.msg || '添加失败')
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+const editUserCommit = async () => {
+  try {
+    const params: OperateUser = {
+      msg: '',
+      code: '',
+      data: {
+        ...operateFormList.value,
+      },
+    }
+    console.log(params)
+
+    const res: BaseResponse | null = await userStore.EditUser(operateId.value as number, params)
+    console.log(res)
+
+    if (res?.result.status === 1) {
+      ElMessage.success('编辑成功')
+      operateDialogVisible.value = false
+      handleReset()
+    } else {
+      ElMessage.warning(res?.result.msg || '编辑失败')
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+//操作回调
+const handleDialogOperate = (formEl: FormInstance | undefined) => {
+  formEl?.validate((valid) => {
     if (valid) {
-      const params: AddUserData = {
-        msg: '',
-        code: '',
-        data: {
-          ...addFormList.value,
-        },
-      }
-      // console.log(params)
-      const res: BaseResponse | null = await userStore.AddUser(params)
-      // console.log(res)
-      if (res?.result.status === 1) {
-        ElMessage.success('添加成功')
-        handleSearch()
-        addDialogVisible.value = false
-      }
+      !operateId.value ? addUserCommit() : editUserCommit()
     }
   })
+}
+const handleDeleteById = (id: number) => {
+  ElMessageBox.confirm('确认删除该用户吗?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(async () => {
+      try {
+        const res: BaseResponse | null = await userStore.DeleteUserById(id)
+        // console.log(res)
+        if (res?.result.status === 1) {
+          ElMessage.success('删除成功')
+          handleReset()
+        } else {
+          ElMessage.warning(res?.result.msg || '删除失败')
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    })
+    .catch(() => {
+      ElMessage.info('已取消删除')
+    })
+}
+const handleLock = async (id: number, lockFlag: number) => {
+  const isLock: string = lockFlag ? '解封' : '封禁'
+  ElMessageBox.confirm(`确认${isLock}该用户吗`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(async () => {
+      try {
+        const res: BaseResponse | null = await userStore.LockUser(id)
+        // console.log(res)
+        if (res?.result.status === 1) {
+          ElMessage.success(`${isLock}成功`)
+          handleReset()
+        } else {
+          ElMessage.warning(res?.result.msg || `${isLock}失败`)
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    })
+    .catch(() => {
+      ElMessage.info(`已取消${isLock}`)
+    })
 }
 
 onMounted(() => {
@@ -348,9 +519,10 @@ onMounted(() => {
 @include b(container) {
   width: 100%;
   height: 100%;
-  padding: 20px;
+  padding: 0 20px;
 }
 @include b(header) {
+  margin-top: 20px;
   border-radius: 10px;
   background-color: #fff;
   padding: 10px;

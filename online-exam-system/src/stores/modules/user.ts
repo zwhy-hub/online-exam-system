@@ -10,7 +10,7 @@ import type {
   RegisterResponse,
   FetchUserList,
   FetchUserListResponse,
-  AddUserData,
+  OperateUser,
 } from '@/api/user/type'
 
 const useUserStore = defineStore('User', {
@@ -50,8 +50,8 @@ const useUserStore = defineStore('User', {
     },
 
     //删除用户
-    async DeleteUserByid(id: number) {
-      const res: BaseResponse | null = await AuthService.deleteUserByid(id)
+    async DeleteUserById(id: number) {
+      const res: BaseResponse | null = await AuthService.deleteUserById(id)
       if (!res) {
         console.log('删除用户接口返回为空')
         return null
@@ -70,10 +70,30 @@ const useUserStore = defineStore('User', {
     },
 
     //添加用户
-    async AddUser(data: AddUserData) {
+    async AddUser(data: OperateUser) {
       const res: BaseResponse | null = await AuthService.addUser(data)
       if (!res) {
         console.log('获取用户列表接口返回为空')
+        return null
+      }
+      return res
+    },
+
+    //编辑用户
+    async EditUser(id: number, data: OperateUser) {
+      const res: BaseResponse | null = await AuthService.editUser(id, data)
+      if (!res) {
+        console.log('编辑用户接口返回为空')
+        return null
+      }
+      return res
+    },
+
+    //解封/封禁用户
+    async LockUser(id: number) {
+      const res: BaseResponse | null = await AuthService.lockUser(id)
+      if (!res) {
+        console.log('解封/封禁用户接口返回为空')
         return null
       }
       return res

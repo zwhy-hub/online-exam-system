@@ -1,12 +1,14 @@
 import * as types from './type'
-import { Get, Post, Param, Delete } from '@/utils/decorators' // 引入封装好的装饰器
+import { Get, Post, Param, PostById, PostIdOnly } from '@/utils/decorators' // 引入封装好的装饰器
 
 class AuthService {
+  //注册
   @Post('/register')
   async register(data: types.RegisterData): Promise<types.RegisterResponse | null> {
     return null
   }
 
+  //登录
   @Post('/login')
   async login(data: types.LoginData): Promise<types.LoginResponse | null> {
     return null
@@ -19,8 +21,8 @@ class AuthService {
   }
 
   //删除非管理员
-  @Delete('/user/deleteUser/')
-  async deleteUserByid(id: number): Promise<types.BaseResponse | null> {
+  @PostIdOnly('/user/deleteUser/')
+  async deleteUserById(id: number): Promise<types.BaseResponse | null> {
     return null
   }
 
@@ -32,7 +34,19 @@ class AuthService {
 
   //添加用户
   @Post('/user/saveUser')
-  async addUser(data: types.AddUserData): Promise<types.BaseResponse | null> {
+  async addUser(data: types.OperateUser): Promise<types.BaseResponse | null> {
+    return null
+  }
+
+  //编辑用户
+  @PostById('/user/updateUser')
+  async editUser(id: number, data: types.OperateUser): Promise<types.BaseResponse | null> {
+    return null
+  }
+
+  //封禁/解封用户
+  @PostIdOnly('/user/lockUser')
+  async lockUser(id: number): Promise<types.BaseResponse | null> {
     return null
   }
 }
