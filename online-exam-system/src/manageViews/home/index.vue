@@ -81,11 +81,11 @@ const isTeacher = ref(userStore ? userStore?.user?.role === 2 : false)
 const handleSelect = (key: string) => {
   activePath.value = key
 }
-const handleOpen = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
+const handleOpen = (_key: string, _keyPath: string[]) => {
+  // console.log(key, keyPath)
 }
-const handleClose = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
+const handleClose = (_key: string, _keyPath: string[]) => {
+  // console.log(key, keyPath)
 }
 </script>
 <style lang="scss" scoped>
