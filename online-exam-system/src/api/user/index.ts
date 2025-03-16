@@ -1,5 +1,5 @@
 import * as types from './type'
-import { Get, Post, Param, PostById, PostIdOnly } from '@/utils/decorators' // 引入封装好的装饰器
+import { Post, PostById, PostIdOnly } from '@/utils/decorators' // 引入封装好的装饰器
 
 class AuthService {
   //注册
