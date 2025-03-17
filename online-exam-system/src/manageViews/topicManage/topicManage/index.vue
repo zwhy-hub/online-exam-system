@@ -11,7 +11,7 @@
       <el-form-item>
         <el-input
           placeholder="题目名称"
-          v-model="searchForm.topicName"
+          v-model="searchForm.content"
           class="ex-form__item"
         ></el-input>
       </el-form-item>
@@ -50,7 +50,7 @@
 
     <template #table-columns>
       <el-table-column type="selection" width="55" />
-      <el-table-column label="题目名称" prop="topicName"></el-table-column>
+      <el-table-column label="题目名称" prop="content"></el-table-column>
       <el-table-column label="题目类型" width="120">
         <template #default="scope">
           <el-tag :type="getTopicTypeTag(scope.row.type)">
@@ -96,7 +96,7 @@
         >
           <el-form-item label="题目名称" prop="topicName">
             <el-input
-              v-model="operateFormList.topicName"
+              v-model="operateFormList.content"
               placeholder="请输入题目名称"
               clearable
             ></el-input>
@@ -132,46 +132,45 @@ import type { FormInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Timer } from '@element-plus/icons-vue'
 import BaseManageLayout from '@/components/BaseManageLayout.vue'
+import type { FetchTopicListResponse, SearchFormData, TopicInfoData } from '@/api/topic/type'
+import type { BaseResponse } from '@/api/user/type'
+import useTopicStore from '@/stores/modules/topic'
+import topic from '@/api/topic'
 
-interface TopicInfo {
-  id: number
-  topicName: string
-  type: number
-  createTime: string
-}
+const topicStore = useTopicStore()
 
 interface SearchForm {
-  topicName: string
-  type: number | null
-  createTime: string | null
+  content: string
+  type: number
+  createTime?: string
 }
 
 interface OperateForm {
-  topicName: string
+  content: string
   type: number
 }
 
-const multipleSelection = ref<TopicInfo[]>([])
+const multipleSelection = ref<TopicInfoData[]>([])
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(5)
 const total = ref<number>(0)
 
 const searchForm = ref<SearchForm>({
-  topicName: '',
-  type: null,
-  createTime: null,
+  content: '',
+  type: 1,
+  createTime: '',
 })
 
-const topicList = ref<TopicInfo[]>([])
+const topicList = ref<TopicInfoData[]>([])
 const operateDialogVisible = ref<boolean>(false)
 const operateFormList = ref<OperateForm>({
-  topicName: '',
+  content: '',
   type: 1,
 })
 const operateFormListRef = ref<FormInstance>()
 const operateId = ref<number | null>(null)
 
-const topicNameValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
+const contentValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
   if (value === '') {
     callback(new Error('请输入题目名称'))
   } else if (value.length < 2 || value.length > 100) {
@@ -182,7 +181,7 @@ const topicNameValidate = (_rule: any, value: string, callback: (arg0?: Error) =
 }
 
 const rules = {
-  topicName: [{ required: true, validate: topicNameValidate, trigger: 'blur' }],
+  contentName: [{ required: true, validate: contentValidate, trigger: 'blur' }],
   type: [{ required: true, message: '请选择题目类型', trigger: 'change' }],
 }
 
@@ -212,29 +211,28 @@ const getTopicTypeTag = (type: number) => {
   }
 }
 
-const handleSelectionChange = (val: TopicInfo[]) => {
+const handleSelectionChange = (val: TopicInfoData[]) => {
   multipleSelection.value = val
 }
 
 const handleSearch = async () => {
   try {
-    // TODO: 实现题目查询逻辑
-    const mockData: TopicInfo[] = [
-      {
-        id: 1,
-        topicName: '测试题目1',
-        type: 1,
-        createTime: '2024-03-20 10:00:00',
+    const params: SearchFormData = {
+      page: currentPage.value,
+      limit: pageSize.value,
+      data: {
+        ...searchForm.value,
       },
-      {
-        id: 2,
-        topicName: '测试题目2',
-        type: 2,
-        createTime: '2024-03-20 11:00:00',
-      },
-    ]
-    topicList.value = mockData
-    total.value = mockData.length
+    }
+    // console.log(params)
+    const res: FetchTopicListResponse | null = await topicStore.FetchTopicList(params)
+    // console.log(res)
+    if (res?.result.status === 1) {
+      topicList.value = res.data?.records as TopicInfoData[]
+      total.value = res.data?.total as number
+    } else {
+      console.log(res?.result.msg || '查询失败')
+    }
   } catch (error) {
     console.error(error)
     ElMessage.error('查询失败')
@@ -243,9 +241,9 @@ const handleSearch = async () => {
 
 const handleReset = () => {
   searchForm.value = {
-    topicName: '',
-    type: null,
-    createTime: null,
+    content: '',
+    type: 1,
+    createTime: '',
   }
   handleSearch()
 }
@@ -273,16 +271,16 @@ const handleDelete = async () => {
 const handleAdd = () => {
   operateId.value = null
   operateFormList.value = {
-    topicName: '',
+    content: '',
     type: 1,
   }
   operateDialogVisible.value = true
 }
 
-const handleEdit = (row: TopicInfo) => {
+const handleEdit = (row: any) => {
   operateId.value = row.id
   operateFormList.value = {
-    topicName: row.topicName,
+    content: row.content,
     type: row.type,
   }
   operateDialogVisible.value = true

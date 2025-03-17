@@ -11,12 +11,16 @@
       <el-form-item>
         <el-input
           placeholder="题库名称"
-          v-model="searchForm.bankName"
+          v-model="searchForm.data.title"
           class="ex-form__item"
         ></el-input>
       </el-form-item>
       <el-form-item>
-        <el-date-picker v-model="searchForm.createTime" type="datetime" placeholder="创建时间" />
+        <el-date-picker
+          v-model="searchForm.data.startTime"
+          type="datetime"
+          placeholder="创建时间"
+        />
       </el-form-item>
     </template>
 
@@ -37,7 +41,7 @@
 
     <template #table-columns>
       <el-table-column type="selection" width="55" />
-      <el-table-column label="题库名称" prop="bankName"></el-table-column>
+      <el-table-column label="题库名称" prop="title"></el-table-column>
       <el-table-column label="创建时间" min-width="120px">
         <template #default="scope">
           <div style="display: flex; align-items: center">
@@ -74,9 +78,9 @@
           label-width="auto"
           class="ex-operateFormList"
         >
-          <el-form-item label="题库名称" prop="bankName">
+          <el-form-item label="题库名称" prop="title">
             <el-input
-              v-model="operateFormList.bankName"
+              v-model="operateFormList.title"
               placeholder="请输入题库名称"
               clearable
             ></el-input>
@@ -101,41 +105,41 @@ import type { FormInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Timer } from '@element-plus/icons-vue'
 import BaseManageLayout from '@/components/BaseManageLayout.vue'
+import type {
+  FetchQuestionBankList,
+  FetchQuestionBankListResponse,
+  QurstionBankInfoData,
+} from '@/api/topic/type'
+import useTopicStore from '@/stores/modules/topic'
 
-interface QuestionBankInfo {
-  id: number
-  bankName: string
-  createTime: string
-}
-
-interface SearchForm {
-  bankName: string
-  createTime: string | null
-}
-
+const topicStore = useTopicStore()
 interface OperateForm {
-  bankName: string
+  title: string
 }
 
-const multipleSelection = ref<QuestionBankInfo[]>([])
+const multipleSelection = ref<QurstionBankInfoData[]>([])
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(5)
 const total = ref<number>(0)
 
-const searchForm = ref<SearchForm>({
-  bankName: '',
-  createTime: null,
+const searchForm = ref<FetchQuestionBankList>({
+  page: currentPage.value,
+  limit: pageSize.value,
+  data: {
+    title: '',
+    startTime: '',
+  },
 })
 
-const questionBankList = ref<QuestionBankInfo[]>([])
+const questionBankList = ref<QurstionBankInfoData[]>([])
 const operateDialogVisible = ref<boolean>(false)
 const operateFormList = ref<OperateForm>({
-  bankName: '',
+  title: '',
 })
 const operateFormListRef = ref<FormInstance>()
 const operateId = ref<number | null>(null)
 
-const bankNameValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
+const titleValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
   if (value === '') {
     callback(new Error('请输入题库名称'))
   } else if (value.length < 2 || value.length > 100) {
@@ -146,30 +150,27 @@ const bankNameValidate = (_rule: any, value: string, callback: (arg0?: Error) =>
 }
 
 const rules = {
-  bankName: [{ required: true, validate: bankNameValidate, trigger: 'blur' }],
+  title: [{ required: true, validate: titleValidate, trigger: 'blur' }],
 }
 
-const handleSelectionChange = (val: QuestionBankInfo[]) => {
+const handleSelectionChange = (val: QurstionBankInfoData[]) => {
   multipleSelection.value = val
 }
 
 const handleSearch = async () => {
   try {
-    // TODO: 实现题库查询逻辑
-    const mockData: QuestionBankInfo[] = [
-      {
-        id: 1,
-        bankName: '测试题库1',
-        createTime: '2024-03-20 10:00:00',
-      },
-      {
-        id: 2,
-        bankName: '测试题库2',
-        createTime: '2024-03-20 11:00:00',
-      },
-    ]
-    questionBankList.value = mockData
-    total.value = mockData.length
+    const params: FetchQuestionBankList = {
+      ...searchForm.value,
+    }
+    // console.log(params)
+    const res: FetchQuestionBankListResponse | null = await topicStore.FetchQuestionBank(params)
+    // console.log(res)
+    if (res?.result.status === 1) {
+      questionBankList.value = res.data.records
+      total.value = res.data.total
+    } else {
+      console.log(res?.result.msg || '查询失败')
+    }
   } catch (error) {
     console.error(error)
     ElMessage.error('查询失败')
@@ -178,8 +179,12 @@ const handleSearch = async () => {
 
 const handleReset = () => {
   searchForm.value = {
-    bankName: '',
-    createTime: null,
+    page: currentPage.value,
+    limit: pageSize.value,
+    data: {
+      title: '',
+      startTime: '',
+    },
   }
   handleSearch()
 }
@@ -207,15 +212,15 @@ const handleDelete = async () => {
 const handleAdd = () => {
   operateId.value = null
   operateFormList.value = {
-    bankName: '',
+    title: '',
   }
   operateDialogVisible.value = true
 }
 
-const handleEdit = (row: QuestionBankInfo) => {
+const handleEdit = (row: any) => {
   operateId.value = row.id
   operateFormList.value = {
-    bankName: row.bankName,
+    title: row.title,
   }
   operateDialogVisible.value = true
 }

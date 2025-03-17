@@ -282,6 +282,8 @@ const handleSearch = async () => {
         lockFlag: searchForm.value.lockFlag,
       },
     }
+    // console.log(params)
+
     const res: FetchUserListResponse | null = await userStore.FetchUserList(params)
     if (res?.result.status === 1) {
       UserList.value = res.data.records
