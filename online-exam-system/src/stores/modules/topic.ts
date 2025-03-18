@@ -24,6 +24,34 @@ const useTopicStore = defineStore('Topic', {
       }
       return res
     },
+
+    //添加题库
+    async AddQuestionBank(id: number, data: types.OperateQuestionBankData) {
+      const res: types.BaseResponse | null = await AuthServeice.addQuestionBank(id, data)
+      if (!res) {
+        console.error('添加接口返回为空')
+        return null
+      }
+      return res
+    },
+    //编辑题库
+    async EditQuestionBank(id: number, data: types.OperateQuestionBankData) {
+      const res: types.BaseResponse | null = await AuthServeice.addQuestionBank(id, data)
+      if (!res) {
+        console.error('编辑接口返回为空')
+        return null
+      }
+      return res
+    },
+    //删除题库
+    async DeleteQuestionBank(id: number) {
+      const res: types.BaseResponse | null = await AuthServeice.deleteQuestionBank(id)
+      if (!res) {
+        console.error('删除接口返回为空')
+        return null
+      }
+      return res
+    },
   },
 })
 

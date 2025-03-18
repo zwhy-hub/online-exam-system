@@ -15,6 +15,27 @@ class AuthServeice {
   ): Promise<types.FetchQuestionBankListResponse | null> {
     return null
   }
+  //添加题库
+  @PostById('/repo/save')
+  async addQuestionBank(
+    id: number,
+    data: types.OperateQuestionBankData,
+  ): Promise<types.BaseResponse | null> {
+    return null
+  }
+  //编辑题库
+  @PostById('/repo/update')
+  async editQuestionBank(
+    id: number,
+    data: types.OperateQuestionBankData,
+  ): Promise<types.BaseResponse | null> {
+    return null
+  }
+  //删除题库
+  @PostIdOnly('/repo/delete')
+  async deleteQuestionBank(id: number): Promise<types.BaseResponse | null> {
+    return null
+  }
 }
 
 export default new AuthServeice()

@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { toRefs } from 'vue'
 import type { TableInstance } from 'element-plus'
 
 interface Props {
@@ -49,12 +49,16 @@ interface Props {
   showPagination?: boolean
   pageSizes?: number[]
   paginationLayout?: string
+  currentPage: number
+  pageSize: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showPagination: true,
   pageSizes: () => [5, 10, 15, 20],
   paginationLayout: 'total, sizes, prev, pager, next, jumper',
+  currentPage: 1,
+  pageSize: 5,
 })
 
 const emit = defineEmits<{
@@ -63,17 +67,13 @@ const emit = defineEmits<{
   (e: 'selection-change', selection: any[]): void
 }>()
 
-const multipleTableRef = ref<TableInstance>()
-const currentPage = ref(1)
-const pageSize = ref(5)
+const { currentPage, pageSize } = toRefs(props)
 
 const handleSizeChange = (val: number) => {
-  pageSize.value = val
   emit('update:pageSize', val)
 }
 
 const handleCurrentChange = (val: number) => {
-  currentPage.value = val
   emit('update:currentPage', val)
 }
 
@@ -83,26 +83,26 @@ const handleSelectionChange = (selection: any[]) => {
 </script>
 
 <style lang="scss" scoped>
-@include b(container) {
+.ex-container {
   width: 100%;
   height: 100%;
   padding: 0 20px;
 }
 
-@include b(header) {
+.ex-header {
   margin-top: 20px;
   border-radius: 10px;
   background-color: #fff;
   padding: 10px;
 }
 
-@include b(form) {
-  @include e(item) {
+.ex-form {
+  .el-form-item {
     width: 220px;
   }
 }
 
-@include b(content) {
+.ex-content {
   border-radius: 10px;
   margin-top: 20px;
   padding: 10px;

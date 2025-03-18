@@ -83,6 +83,14 @@ interface FetchQuestionBankListResponse {
     records: QurstionBankInfoData[]
   }
 }
+//添加题库
+interface OperateQuestionBankData {
+  msg: string
+  code: string
+  data: {
+    title: string
+  }
+}
 export type {
   TopicInfoData,
   BaseResponse,
@@ -91,4 +99,5 @@ export type {
   FetchQuestionBankList,
   FetchQuestionBankListResponse,
   QurstionBankInfoData,
+  OperateQuestionBankData,
 }

@@ -6,6 +6,8 @@
     @selection-change="handleSelectionChange"
     v-model:current-page="currentPage"
     v-model:page-size="pageSize"
+    @update:current-page="handleCurrentChange"
+    @update:page-size="handleSizeChange"
   >
     <template #search-form>
       <el-form-item>
@@ -52,7 +54,13 @@
       </el-table-column>
       <el-table-column label="操作" min-width="120px">
         <template #default="scope">
-          <el-button size="small" type="primary" plain @click="handleEdit(scope.row)">
+          <el-button
+            size="small"
+            type="primary"
+            plain
+            @click="handleEdit(scope.row)"
+            :disabled="currentUserId !== scope.row.createUserId"
+          >
             编辑
           </el-button>
           <el-button @click="handleDeleteById(scope.row.id)" plain type="danger" size="small">
@@ -106,31 +114,30 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Timer } from '@element-plus/icons-vue'
 import BaseManageLayout from '@/components/BaseManageLayout.vue'
 import type {
+  OperateQuestionBankData,
   FetchQuestionBankList,
   FetchQuestionBankListResponse,
   QurstionBankInfoData,
 } from '@/api/topic/type'
 import useTopicStore from '@/stores/modules/topic'
+import type { BaseResponse } from '@/api/topic/type'
+import useUserStore from '@/stores/modules/user'
 
+const userStore = useUserStore()
 const topicStore = useTopicStore()
 interface OperateForm {
   title: string
 }
-
 const multipleSelection = ref<QurstionBankInfoData[]>([])
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(5)
 const total = ref<number>(0)
-
-const searchForm = ref<FetchQuestionBankList>({
-  page: currentPage.value,
-  limit: pageSize.value,
+const searchForm = ref({
   data: {
     title: '',
     startTime: '',
   },
 })
-
 const questionBankList = ref<QurstionBankInfoData[]>([])
 const operateDialogVisible = ref<boolean>(false)
 const operateFormList = ref<OperateForm>({
@@ -138,6 +145,7 @@ const operateFormList = ref<OperateForm>({
 })
 const operateFormListRef = ref<FormInstance>()
 const operateId = ref<number | null>(null)
+const currentUserId = userStore.user?.id as number
 
 const titleValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
   if (value === '') {
@@ -160,7 +168,9 @@ const handleSelectionChange = (val: QurstionBankInfoData[]) => {
 const handleSearch = async () => {
   try {
     const params: FetchQuestionBankList = {
-      ...searchForm.value,
+      page: currentPage.value,
+      limit: pageSize.value,
+      data: searchForm.value.data,
     }
     // console.log(params)
     const res: FetchQuestionBankListResponse | null = await topicStore.FetchQuestionBank(params)
@@ -178,9 +188,9 @@ const handleSearch = async () => {
 }
 
 const handleReset = () => {
+  currentPage.value = 1
+  pageSize.value = 5
   searchForm.value = {
-    page: currentPage.value,
-    limit: pageSize.value,
     data: {
       title: '',
       startTime: '',
@@ -235,7 +245,6 @@ const handleClose = (done: () => void) => {
 
 const handleDialogOperate = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-
   try {
     await formEl.validate()
     if (operateId.value) {
@@ -252,9 +261,20 @@ const handleDialogOperate = async (formEl: FormInstance | undefined) => {
 
 const addQuestionBank = async () => {
   try {
-    // TODO: 调用添加题库接口
-    console.log('添加题库:', operateFormList.value)
-    ElMessage.success('添加成功')
+    const params: OperateQuestionBankData = {
+      msg: '',
+      code: '',
+      data: {
+        title: operateFormList.value.title,
+      },
+    }
+    // console.log(id, params)
+    const res: BaseResponse | null = await topicStore.AddQuestionBank(currentUserId, params)
+    // console.log(res)
+    if (res?.result.status === 1) {
+      ElMessage.success('添加成功')
+      handleSearch()
+    }
   } catch (error) {
     console.error(error)
     ElMessage.error('添加失败')
@@ -263,9 +283,23 @@ const addQuestionBank = async () => {
 
 const editQuestionBank = async () => {
   try {
-    // TODO: 调用编辑题库接口
-    console.log('编辑题库:', { id: operateId.value, ...operateFormList.value })
-    ElMessage.success('编辑成功')
+    const params: OperateQuestionBankData = {
+      msg: '',
+      code: '',
+      data: {
+        title: operateFormList.value.title,
+      },
+    }
+    console.log(params)
+    const res: BaseResponse | null = await topicStore.EditQuestionBank(
+      operateId.value as number,
+      params,
+    )
+    console.log(res)
+    if (res?.result.status === 1) {
+      ElMessage.success('编辑成功')
+      handleSearch()
+    }
   } catch (error) {
     console.error(error)
     ElMessage.error('编辑失败')
@@ -279,16 +313,33 @@ const handleDeleteById = async (id: number) => {
       cancelButtonText: '取消',
       type: 'warning',
     })
-    // TODO: 调用删除题库接口
-    console.log('删除题库ID:', id)
-    ElMessage.success('删除成功')
-    handleSearch()
+    const res: BaseResponse | null = await topicStore.DeleteQuestionBank(id)
+    if (res?.result.status === 1) {
+      console.log('删除题库ID:', id)
+      ElMessage.success('删除成功')
+      handleSearch()
+    } else {
+      ElMessage.warning(res?.result.msg || '删除失败')
+    }
   } catch (error) {
     if (error !== 'cancel') {
       console.error(error)
       ElMessage.error('删除失败')
     }
   }
+}
+
+const handleSizeChange = (val: number) => {
+  // console.log(val)
+  pageSize.value = val
+  currentPage.value = 1
+  handleSearch()
+}
+
+const handleCurrentChange = (val: number) => {
+  // console.log(val)
+  currentPage.value = val
+  handleSearch()
 }
 
 onMounted(() => {
