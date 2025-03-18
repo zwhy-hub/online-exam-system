@@ -112,6 +112,24 @@
               <el-option label="判断题" :value="3" />
             </el-select>
           </el-form-item>
+          <el-form-item label="选择题库" prop="repoIds">
+            <el-select
+              v-model="operateFormList.repoIds"
+              multiple
+              collapse-tags
+              collapse-tags-tooltip
+              :max-collapse-tags="3"
+              placeholder="Select"
+              style="width: 240px"
+            >
+              <el-option
+                v-for="item in repos"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
         </el-form>
         <template #footer>
           <div class="dialog-footer">
@@ -148,27 +166,33 @@ interface SearchForm {
 interface OperateForm {
   content: string
   type: number
+  radioCorrectionList?: number[] //单选答案
+  radioAswerList?: string[] //单选选项
+  multipleCorrectionList?: number[] //多选答案
+  multipleAnswerList?: string[] //多选选项
+  judgeCorrection?: number //判断
+  repoIds: number[] //题库id
 }
 
 const multipleSelection = ref<TopicInfoData[]>([])
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(5)
 const total = ref<number>(0)
-
 const searchForm = ref<SearchForm>({
   content: '',
   type: 1,
   createTime: '',
 })
-
 const topicList = ref<TopicInfoData[]>([])
 const operateDialogVisible = ref<boolean>(false)
 const operateFormList = ref<OperateForm>({
   content: '',
   type: 1,
+  repoIds: [],
 })
 const operateFormListRef = ref<FormInstance>()
 const operateId = ref<number | null>(null)
+const repos = ref() //题库
 
 const contentValidate = (_rule: any, value: string, callback: (arg0?: Error) => void) => {
   if (value === '') {
@@ -273,6 +297,7 @@ const handleAdd = () => {
   operateFormList.value = {
     content: '',
     type: 1,
+    repoIds: [],
   }
   operateDialogVisible.value = true
 }
@@ -282,6 +307,7 @@ const handleEdit = (row: any) => {
   operateFormList.value = {
     content: row.content,
     type: row.type,
+    repoIds: row.repoIds,
   }
   operateDialogVisible.value = true
 }

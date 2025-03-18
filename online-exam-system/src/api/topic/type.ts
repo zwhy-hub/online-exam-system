@@ -44,6 +44,21 @@ interface FetchTopicListResponse {
     records: TopicInfoData[]
   }
 }
+//操作题目
+interface OperateTopic {
+  msg: string
+  code: string
+  data: {
+    content: string
+    type: number
+    radioCorrectionList?: number[] //单选答案
+    radioAswerList?: string[] //单选选项
+    multipleCorrectionList?: number[] //多选答案
+    multipleAnswerList?: string[] //多选选项
+    judgeCorrection?: number //判断
+    repoIds: number[] //题库id
+  }
+}
 
 interface QurstionBankInfoData {
   id?: number
@@ -100,4 +115,5 @@ export type {
   FetchQuestionBankListResponse,
   QurstionBankInfoData,
   OperateQuestionBankData,
+  OperateTopic,
 }
