@@ -16,6 +16,7 @@ export default defineConfig(() => ({
       enable: true,
       mockPath: 'mock',
       logger: true,
+      watchFiles: true, // 监听文件变化
     }),
   ],
   resolve: {

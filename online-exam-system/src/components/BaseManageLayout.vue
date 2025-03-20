@@ -45,7 +45,7 @@ import type { TableInstance } from 'element-plus'
 interface Props {
   tableData: any[]
   total: number
-  searchForm: Record<string, any>
+  searchForm: Record<string, any> //key value
   showPagination?: boolean
   pageSizes?: number[]
   paginationLayout?: string

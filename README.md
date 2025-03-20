@@ -10,6 +10,7 @@
 - TypeScript
 - Vite
 - Element Plus
+- Sass
 - Pinia (状态管理)
 - Vue Router
 - Mock.js (数据模拟)
