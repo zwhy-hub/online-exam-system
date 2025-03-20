@@ -21,6 +21,29 @@ const Get = (url: string) => {
   }
 }
 
+const GetIdOnly = (url: string) => {
+  return function (
+    target: any,
+    context: ClassMethodDecoratorContext<any, (this: any, ...args: any[]) => any>,
+  ) {
+    context.addInitializer(function () {
+      const originalMethod = this[context.name]
+
+      this[context.name] = async function (...args: any[]) {
+        try {
+          const requestUrl = `${url}/${args[0]}`
+          // console.log(`GET ${requestUrl}`)
+          const response = await req.get(requestUrl)
+          return response
+        } catch (error) {
+          console.error(`GET ${url} API error:`, error)
+          return originalMethod?.apply(this, args)
+        }
+      }
+    })
+  }
+}
+
 const Post = (url: string) => {
   return function (
     target: any,
@@ -88,21 +111,21 @@ const PostIdOnly = (url: string) => {
   }
 }
 
-const Param = (param: string) => {
-  return function (
-    target: any,
-    context: ClassMethodDecoratorContext<any, (this: any, ...args: any[]) => any>,
-    index: number,
-  ) {
-    context.addInitializer(function () {
-      const originalMethod = this[context.name]
+// const Param = (param: string) => {
+//   return function (
+//     target: any,
+//     context: ClassMethodDecoratorContext<any, (this: any, ...args: any[]) => any>,
+//     index: number,
+//   ) {
+//     context.addInitializer(function () {
+//       const originalMethod = this[context.name]
 
-      this[context.name] = async function (...args: any[]) {
-        args[0][param] = args[index]
-        return originalMethod?.apply(this, args)
-      }
-    })
-  }
-}
+//       this[context.name] = async function (...args: any[]) {
+//         args[0][param] = args[index]
+//         return originalMethod?.apply(this, args)
+//       }
+//     })
+//   }
+// }
 
-export { Get, Post, PostById, Param, PostIdOnly }
+export { Get, Post, PostById, PostIdOnly, GetIdOnly }

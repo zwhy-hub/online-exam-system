@@ -44,6 +44,26 @@ interface FetchTopicListResponse {
     records: TopicInfoData[]
   }
 }
+interface FetchTopicDetailResponse {
+  costTime: number
+  result: {
+    status: number
+    code: number
+    msg?: string
+  }
+  data: {
+    id: number[]
+    content: string
+    type: number
+    answerList: {
+      id: number
+      content: string
+      correctFlag: number
+      questionId: number
+    }[]
+    judgeCorrection?: number
+  }
+}
 //操作题目
 interface OperateTopic {
   msg: string
@@ -52,12 +72,22 @@ interface OperateTopic {
     content: string
     type: number
     radioCorrectionList?: number[] //单选答案
-    radioAswerList?: string[] //单选选项
+    radioAnswerList?: string[] //单选选项
     multipleCorrectionList?: number[] //多选答案
     multipleAnswerList?: string[] //多选选项
     judgeCorrection?: number //判断
     repoIds: number[] //题库id
   }
+}
+//获取题库列表
+interface GetQuestionBankList {
+  costTime: number
+  result: {
+    status: number
+    code: number
+    msg?: string
+  }
+  data?: QurstionBankInfoData[]
 }
 
 interface QurstionBankInfoData {
@@ -116,4 +146,6 @@ export type {
   QurstionBankInfoData,
   OperateQuestionBankData,
   OperateTopic,
+  GetQuestionBankList,
+  FetchTopicDetailResponse,
 }

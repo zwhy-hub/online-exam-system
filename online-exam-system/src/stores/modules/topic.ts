@@ -13,7 +13,52 @@ const useTopicStore = defineStore('Topic', {
       }
       return res
     },
-
+    //根据题目id获取题库列表
+    async FetchQuestionBankByTopicId(id: number) {
+      const res: types.GetQuestionBankList | null =
+        await AuthServeice.fetchQuestionBankByTopicId(id)
+      if (!res) {
+        console.error('查询接口返回为空')
+        return null
+      }
+      return res
+    },
+    //查询题目详情
+    async FetchTopicDetail(id: number) {
+      const res: types.FetchTopicDetailResponse | null = await AuthServeice.fetchTopicDetail(id)
+      if (!res) {
+        console.error('查询接口返回为空')
+        return null
+      }
+      return res
+    },
+    //添加题目
+    async AddTopic(id: number, data: types.OperateTopic) {
+      const res: types.BaseResponse | null = await AuthServeice.addTopic(id, data)
+      if (!res) {
+        console.error('添加接口返回为空')
+        return null
+      }
+      return res
+    },
+    //编辑题目
+    async EditTopic(id: number, data: types.OperateTopic) {
+      const res: types.BaseResponse | null = await AuthServeice.editTopic(id, data)
+      if (!res) {
+        console.error('编辑接口返回为空')
+        return null
+      }
+      return res
+    },
+    //删除题目
+    async DeleteTopic(id: number) {
+      const res: types.BaseResponse | null = await AuthServeice.deleteTopic(id)
+      if (!res) {
+        console.error('删除接口返回为空')
+        return null
+      }
+      return res
+    },
     //获取题库列表
     async FetchQuestionBank(data: types.FetchQuestionBankList) {
       const res: types.FetchQuestionBankListResponse | null =
@@ -48,6 +93,15 @@ const useTopicStore = defineStore('Topic', {
       const res: types.BaseResponse | null = await AuthServeice.deleteQuestionBank(id)
       if (!res) {
         console.error('删除接口返回为空')
+        return null
+      }
+      return res
+    },
+    //获取题库列表
+    async GetQuestionBankList() {
+      const res: types.GetQuestionBankList | null = await AuthServeice.getQuestionBankList()
+      if (!res) {
+        console.error('查询接口返回为空')
         return null
       }
       return res
